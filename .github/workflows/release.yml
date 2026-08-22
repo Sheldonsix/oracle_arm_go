@@ -1,0 +1,89 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "v*"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build archives
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version="${GITHUB_REF_NAME//\//-}"
+          mkdir -p dist
+
+          while read -r goos goarch; do
+            name="oracle-arm_${version}_${goos}_${goarch}"
+            ext=""
+            if [ "$goos" = "windows" ]; then
+              ext=".exe"
+            fi
+
+            mkdir -p "dist/$name"
+            CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build -trimpath -ldflags="-s -w" -o "dist/$name/oracle-arm$ext" .
+            cp README.md "dist/$name/"
+            cp .env.example "dist/$name/"
+            tar -C dist -czf "dist/$name.tar.gz" "$name"
+            rm -rf "dist/$name"
+          done <<'TARGETS'
+          linux amd64
+          linux arm64
+          darwin amd64
+          darwin arm64
+          windows amd64
+          windows arm64
+          TARGETS
+
+          (cd dist && sha256sum *.tar.gz > checksums.txt)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oracle-arm-binaries
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: oracle-arm-binaries
+          path: dist
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* --title "$GITHUB_REF_NAME" --generate-notes
+          fi
