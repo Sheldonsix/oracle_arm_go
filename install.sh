@@ -6,6 +6,8 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m'
 REPO="Sheldonsix/oracle_arm_go"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/oracle-arm-go}"
+INSTALL_DIR="${INSTALL_DIR/#\~/$HOME}"
 
 echo -e "${BLUE}==> Starting oracle-arm-go installation...${NC}"
 
@@ -18,6 +20,7 @@ done
 
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
+mkdir -p "$INSTALL_DIR"
 
 # Detect OS and architecture
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -52,29 +55,30 @@ if [ -z "$BIN_PATH" ]; then
     exit 1
 fi
 
-mv "$BIN_PATH" ./oracle-arm
-chmod +x ./oracle-arm
+mv "$BIN_PATH" "$INSTALL_DIR/oracle-arm"
+chmod +x "$INSTALL_DIR/oracle-arm"
 
 # Try to find .env.example
 ENV_EXAMPLE=$(find "$TMP_DIR" -type f -name ".env.example" | head -n 1)
 if [ -n "$ENV_EXAMPLE" ]; then
-    cp "$ENV_EXAMPLE" ./.env.example
+    cp "$ENV_EXAMPLE" "$INSTALL_DIR/.env.example"
 else
     if curl -fsSL "https://raw.githubusercontent.com/${REPO}/main/.env.example" -o "$TMP_DIR/.env.example"; then
-        cp "$TMP_DIR/.env.example" ./.env.example
+        cp "$TMP_DIR/.env.example" "$INSTALL_DIR/.env.example"
     else
         echo -e "${RED}Warning: Could not download .env.example.${NC}"
     fi
 fi
 
-if [ -f .env.example ] && [ ! -f .env ]; then
-    cp .env.example .env
+if [ -f "$INSTALL_DIR/.env.example" ] && [ ! -f "$INSTALL_DIR/.env" ]; then
+    cp "$INSTALL_DIR/.env.example" "$INSTALL_DIR/.env"
     echo -e "${GREEN}==> Created default .env file.${NC}"
 fi
 
 echo -e "${GREEN}==> Installation successful!${NC}"
-echo -e "Executable is located at: $(pwd)/oracle-arm"
-if [ -f .env ]; then
+echo -e "Installed to: ${BLUE}${INSTALL_DIR}${NC}"
+echo -e "Executable is located at: ${BLUE}${INSTALL_DIR}/oracle-arm${NC}"
+if [ -f "$INSTALL_DIR/.env" ]; then
     echo -e "Please edit the ${BLUE}.env${NC} file with your configuration."
 fi
-echo -e "To run the program, use: ${BLUE}./oracle-arm${NC}"
+echo -e "To run the program, use: ${BLUE}cd \"$INSTALL_DIR\" && ./oracle-arm${NC}"

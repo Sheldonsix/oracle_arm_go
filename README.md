@@ -16,15 +16,21 @@ You can install the latest version automatically using our one-click installatio
 
 ```sh
 curl -sL https://raw.githubusercontent.com/Sheldonsix/oracle_arm_go/main/install.sh | bash
+cd ~/oracle-arm-go
 ```
-*(This script will auto-detect your OS and Architecture, download the binary, and set up the `.env` configuration file. You can also manually download it from the [Releases page](https://github.com/Sheldonsix/oracle_arm_go/releases).)*
+*(This script installs to `~/oracle-arm-go`, auto-detects your OS and Architecture, downloads the binary, and creates `.env` when missing. You can also manually download it from the [Releases page](https://github.com/Sheldonsix/oracle_arm_go/releases).)*
 
-#### 2. Configure
-Copy the example environment file and fill in the required values:
+Custom install directory:
 
 ```sh
-cp .env.example .env
-# Edit .env with your favorite editor (e.g., nano, vim)
+export INSTALL_DIR="$HOME/apps/oracle-arm-go"
+curl -sL https://raw.githubusercontent.com/Sheldonsix/oracle_arm_go/main/install.sh | bash
+```
+
+#### 2. Configure
+Fill in the required values:
+
+```sh
 nano .env
 ```
 
@@ -135,15 +141,21 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -o oracle-arm .
 
 ```sh
 curl -sL https://raw.githubusercontent.com/Sheldonsix/oracle_arm_go/main/install.sh | bash
+cd ~/oracle-arm-go
 ```
-*(脚本会自动下载程序，并准备好 `.env` 配置文件供你修改。你也可以前往 [Releases 页面](https://github.com/Sheldonsix/oracle_arm_go/releases) 手动下载。)*
+*(脚本默认安装到 `~/oracle-arm-go`，会自动下载程序，并在缺少 `.env` 时创建配置文件。你也可以前往 [Releases 页面](https://github.com/Sheldonsix/oracle_arm_go/releases) 手动下载。)*
 
-#### 2. 修改配置
-复制 `.env.example` 模板并填写必要的参数：
+自定义安装目录：
 
 ```sh
-cp .env.example .env
-# 使用你喜欢的编辑器修改 .env 文件 (如 nano 或 vim)
+export INSTALL_DIR="$HOME/apps/oracle-arm-go"
+curl -sL https://raw.githubusercontent.com/Sheldonsix/oracle_arm_go/main/install.sh | bash
+```
+
+#### 2. 修改配置
+填写必要的参数：
+
+```sh
 nano .env
 ```
 
