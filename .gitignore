@@ -1,0 +1,4 @@
+oracle-arm
+*.log
+main.tf
+.env
