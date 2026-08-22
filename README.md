@@ -27,7 +27,52 @@ export INSTALL_DIR="$HOME/apps/oracle-arm-go"
 curl -sL https://raw.githubusercontent.com/Sheldonsix/oracle_arm_go/main/install.sh | bash
 ```
 
-#### 2. Configure
+#### 2. Prepare OCI API Config
+This tool uses the same API config file as OCI CLI. If `~/.oci/config` already
+works on this machine, keep the default `.env` values:
+
+```sh
+OCI_CONFIG_FILE="$HOME/.oci/config"
+OCI_CONFIG_PROFILE="DEFAULT"
+```
+
+If OCI CLI is not configured yet:
+
+```sh
+bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)"
+exec -l "$SHELL"
+oci -v
+oci setup config
+oci iam availability-domain list
+```
+
+For a screenshot walkthrough, see [Daniao's OCI setup guide](https://www.daniao.org/14035.html),
+steps **3** and **4**: copy the user OCID and tenancy OCID from the Oracle
+Console, then configure OCI CLI and upload the generated public key.
+
+During `oci setup config`, fill in your user OCID, tenancy OCID, region, and API
+key. Then upload the generated public key:
+
+```sh
+cat ~/.oci/oci_api_key_public.pem
+```
+
+In Oracle Console, add it under **User Settings → Resources → API Keys → Add API
+Key**. The generated `~/.oci/config` should look like:
+
+```ini
+[DEFAULT]
+user=ocid1.user.oc1...
+fingerprint=xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx
+tenancy=ocid1.tenancy.oc1...
+region=ap-tokyo-1
+key_file=/home/your-user/.oci/oci_api_key.pem
+```
+
+If the private key has a passphrase, also set `OCI_PRIVATE_KEY_PASSWORD` in
+`.env`.
+
+#### 3. Configure
 Fill in the required values:
 
 ```sh
@@ -39,7 +84,7 @@ nano .env
 **How to get `main.tf`?**
 You can refer to [this tutorial](https://www.daniao.org/14121.html) (Step 1). Go to the Oracle Cloud instance creation page, configure your desired ARM instance, but instead of clicking "Create", click **"Save as stack"** to download the Terraform configuration zip file, which contains the `main.tf` file.
 
-#### 3. Run
+#### 4. Run
 Load the environment variables and start the script:
 
 ```sh
@@ -152,7 +197,49 @@ export INSTALL_DIR="$HOME/apps/oracle-arm-go"
 curl -sL https://raw.githubusercontent.com/Sheldonsix/oracle_arm_go/main/install.sh | bash
 ```
 
-#### 2. 修改配置
+#### 2. 准备 OCI API 配置
+本工具使用和 OCI CLI 一样的 API 配置文件。如果这台机器上的 `~/.oci/config`
+已经可用，`.env` 里保持默认即可：
+
+```sh
+OCI_CONFIG_FILE="$HOME/.oci/config"
+OCI_CONFIG_PROFILE="DEFAULT"
+```
+
+如果还没有配置 OCI CLI：
+
+```sh
+bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)"
+exec -l "$SHELL"
+oci -v
+oci setup config
+oci iam availability-domain list
+```
+
+图文步骤可以参考 [大鸟博客-Oracle甲骨文 ARM VPS（VM.Standard.A1.Flex）自动抢购脚本代码](https://www.daniao.org/14035.html)
+里的 **步骤 3、复制租户和用户的 OCID** 和 **步骤 4、配置 CLI**：先在甲骨文后台复制用户 OCID、租户 OCID，再配置 OCI CLI 并上传公钥。
+
+执行 `oci setup config` 时，需要填写用户 OCID、租户 OCID、区域和 API Key。然后复制生成的公钥：
+
+```sh
+cat ~/.oci/oci_api_key_public.pem
+```
+
+在甲骨文后台进入 **用户设置 → 资源 → API 秘钥 → 添加 API 秘钥**，把公钥内容粘贴进去。
+生成的 `~/.oci/config` 大致如下：
+
+```ini
+[DEFAULT]
+user=ocid1.user.oc1...
+fingerprint=xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx:xx
+tenancy=ocid1.tenancy.oc1...
+region=ap-tokyo-1
+key_file=/home/your-user/.oci/oci_api_key.pem
+```
+
+如果你的私钥设置了密码，还需要在 `.env` 里填写 `OCI_PRIVATE_KEY_PASSWORD`。
+
+#### 3. 修改配置
 填写必要的参数：
 
 ```sh
@@ -164,7 +251,7 @@ nano .env
 **如何获取 `main.tf` 文件？**
 参考 [大鸟博客的教程](https://www.daniao.org/14121.html)（步骤 **1、生成 main.tf**）。具体方法：在甲骨文控制台正常配置实例参数，完毕后不要点击“创建”，而是点击页面下方的 **“另存为堆栈” (Save as stack)**，下载 Terraform 压缩包并解压，即可得到 `main.tf`。
 
-#### 3. 运行程序
+#### 4. 运行程序
 加载环境变量并启动脚本：
 
 ```sh
