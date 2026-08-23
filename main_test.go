@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"io"
 	"net/url"
 	"strings"
 	"testing"
@@ -83,10 +84,17 @@ func TestCloudInitQuotesPassword(t *testing.T) {
 	}
 }
 
-func TestRetryActionRetriesNetworkTimeout(t *testing.T) {
-	action, msg := retryAction(&url.Error{Op: "Post", URL: "https://iaas.example", Err: timeoutErr{}})
-	if action != slowDown || msg != "temporary network error" {
-		t.Fatalf("retryAction = %v, %q", action, msg)
+func TestRetryActionRetriesTemporaryNetworkErrors(t *testing.T) {
+	errs := []error{
+		&url.Error{Op: "Post", URL: "https://iaas.example", Err: timeoutErr{}},
+		&url.Error{Op: "Post", URL: "https://iaas.example", Err: io.EOF},
+		&url.Error{Op: "Post", URL: "https://iaas.example", Err: io.ErrUnexpectedEOF},
+	}
+	for _, err := range errs {
+		action, msg := retryAction(err)
+		if action != slowDown || msg != "temporary network error" {
+			t.Fatalf("retryAction(%v) = %v, %q", err, action, msg)
+		}
 	}
 }
 
