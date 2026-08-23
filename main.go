@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -526,6 +527,10 @@ const (
 func retryAction(err error) (retryKind, string) {
 	serviceErr, ok := common.IsServiceError(err)
 	if !ok {
+		var netErr net.Error
+		if errors.As(err, &netErr) && (netErr.Timeout() || netErr.Temporary()) {
+			return slowDown, "temporary network error"
+		}
 		return stopRetry, "non-OCI error"
 	}
 	status, code, msg := serviceErr.GetHTTPStatusCode(), serviceErr.GetCode(), serviceErr.GetMessage()

@@ -27,6 +27,18 @@ export INSTALL_DIR="$HOME/apps/oracle-arm-go"
 curl -sL https://raw.githubusercontent.com/Sheldonsix/oracle_arm_go/main/install.sh | bash
 ```
 
+Update:
+
+```sh
+curl -sL https://raw.githubusercontent.com/Sheldonsix/oracle_arm_go/main/install.sh | bash
+cd ~/oracle-arm-go
+```
+
+The installer overwrites `oracle-arm` and `.env.example`, but keeps your existing
+`.env`. If the old program is already running, stop it and start it again so the
+new binary is used. If you installed to a custom directory, export the same
+`INSTALL_DIR` before running the update command.
+
 #### 2. Prepare OCI API Config
 This tool uses the same API config file as OCI CLI. If `~/.oci/config` already
 works on this machine, keep the default `.env` values:
@@ -196,6 +208,15 @@ cd ~/oracle-arm-go
 export INSTALL_DIR="$HOME/apps/oracle-arm-go"
 curl -sL https://raw.githubusercontent.com/Sheldonsix/oracle_arm_go/main/install.sh | bash
 ```
+
+更新程序：
+
+```sh
+curl -sL https://raw.githubusercontent.com/Sheldonsix/oracle_arm_go/main/install.sh | bash
+cd ~/oracle-arm-go
+```
+
+安装脚本会覆盖 `oracle-arm` 和 `.env.example`，但不会覆盖已有的 `.env`。如果旧程序正在运行，需要先停止旧进程，再重新启动，才会使用新的二进制。自定义安装目录的用户，更新前需要先 export 同一个 `INSTALL_DIR`。
 
 #### 2. 准备 OCI API 配置
 本工具使用和 OCI CLI 一样的 API 配置文件。如果这台机器上的 `~/.oci/config`

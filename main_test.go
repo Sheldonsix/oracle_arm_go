@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -81,6 +82,19 @@ func TestCloudInitQuotesPassword(t *testing.T) {
 		t.Fatalf("password was not shell-quoted:\n%s", raw)
 	}
 }
+
+func TestRetryActionRetriesNetworkTimeout(t *testing.T) {
+	action, msg := retryAction(&url.Error{Op: "Post", URL: "https://iaas.example", Err: timeoutErr{}})
+	if action != slowDown || msg != "temporary network error" {
+		t.Fatalf("retryAction = %v, %q", action, msg)
+	}
+}
+
+type timeoutErr struct{}
+
+func (timeoutErr) Error() string   { return "net/http: TLS handshake timeout" }
+func (timeoutErr) Timeout() bool   { return true }
+func (timeoutErr) Temporary() bool { return true }
 
 func mapEnv(values map[string]string) func(string) string {
 	return func(key string) string { return values[key] }
