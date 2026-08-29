@@ -530,6 +530,9 @@ func retryAction(err error) (retryKind, string) {
 		if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
 			return slowDown, "temporary network error"
 		}
+		if strings.Contains(err.Error(), "remote error: tls: user canceled") {
+			return slowDown, "temporary network error"
+		}
 		var netErr net.Error
 		if errors.As(err, &netErr) && (netErr.Timeout() || netErr.Temporary()) {
 			return slowDown, "temporary network error"

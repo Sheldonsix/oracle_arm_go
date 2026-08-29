@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"errors"
 	"io"
 	"net/url"
 	"strings"
@@ -89,6 +90,7 @@ func TestRetryActionRetriesTemporaryNetworkErrors(t *testing.T) {
 		&url.Error{Op: "Post", URL: "https://iaas.example", Err: timeoutErr{}},
 		&url.Error{Op: "Post", URL: "https://iaas.example", Err: io.EOF},
 		&url.Error{Op: "Post", URL: "https://iaas.example", Err: io.ErrUnexpectedEOF},
+		&url.Error{Op: "Post", URL: "https://iaas.example", Err: errors.New("remote error: tls: user canceled")},
 	}
 	for _, err := range errs {
 		action, msg := retryAction(err)
